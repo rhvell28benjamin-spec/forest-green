@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dojo Tracker - Red Fire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: #ffffff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Red Fire Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(-45deg, 
+                rgba(255, 59, 92, 0.03), 
+                rgba(255, 0, 68, 0.05), 
+                rgba(200, 0, 50, 0.03), 
+                rgba(255, 59, 92, 0.02));
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Siri-style animated border */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 3px solid transparent;
+            border-radius: 0;
+            background: linear-gradient(
+                90deg,
+                #ff3b5c,
+                #ff0044,
+                #ff6b9d,
+                #00d4ff,
+                #00ff9f,
+                #7b2cbf,
+                #ff3b5c
+            ) border-box;
+            background-size: 400% 400%;
+            animation: siriGlow 6s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 9999;
+            filter: drop-shadow(0 0 8px rgba(255, 59, 92, 0.6)) 
+                    drop-shadow(0 0 15px rgba(0, 212, 255, 0.4))
+                    drop-shadow(0 0 20px rgba(0, 255, 159, 0.3));
+        }
+
+        @keyframes siriGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Floating particles - Red */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 59, 92, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation: float 8s ease-in-out infinite 1s;
+        }
+
+        .particle:nth-child(3) {
+            top: 40%;
+            left: 30%;
+            animation: float 7s ease-in-out infinite 2s;
+        }
+
+        .particle:nth-child(4) {
+            top: 80%;
+            left: 60%;
+            animation: float 9s ease-in-out infinite 1.5s;
+        }
+
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        .screen.exiting {
+            display: block;
+            animation: fadeOut 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Dashboard Header - Red Theme */
+        .dashboard-header {
+            background: linear-gradient(180deg, rgba(255, 59, 92, 0.15) 0%, rgba(0, 0, 0, 0) 100%);
+            padding: 20px 20px 120px;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .welcome-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 4px;
+        }
+
+        .user-name {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #000000;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* Performance Card - Red Theme */
+        .performance-card {
+            background: linear-gradient(135deg, rgba(255, 59, 92, 0.15), rgba(255, 0, 68, 0.1));
+            border: 1px solid rgba(255, 59, 92, 0.3);
+            border-radius: 24px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .performance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 59, 92, 0.1) 0%, transparent 70%);
+        }
+
+        .perf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .perf-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .perf-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #ff3b5c;
+            font-weight: 600;
+        }
+
+        .perf-main {
+            position: relative;
+        }
+
+        .perf-value {
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .perf-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Trade Cards Container */
+        .trade-cards {
+            margin-top: -80px;
+            padding: 0 20px 100px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .see-all {
+            font-size: 14px;
+            color: #ff3b5c;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Quick Stats Grid with Liquid Animation */
+        .quick-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .quick-stat {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            height: 90px;
+        }
+
+        /* Liquid Fill Animation - Red Theme */
+        .liquid-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .liquid-wave {
+            position: absolute;
+            bottom: -100%;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+            border-radius: 16px;
+            transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease;
+        }
+
+        .quick-stat[data-value="100"] .liquid-wave {
+            bottom: 0;
+            background: linear-gradient(135deg, #00ff9f, #00d982);
+        }
+
+        .quick-stat[data-value="90"] .liquid-wave {
+            bottom: -10%;
+            background: linear-gradient(135deg, #00ff9f, #00d982);
+        }
+
+        .quick-stat[data-value="80"] .liquid-wave {
+            bottom: -20%;
+            background: linear-gradient(135deg, #00ff9f, #00d982);
+        }
+
+        .quick-stat[data-value="70"] .liquid-wave {
+            bottom: -30%;
+            background: linear-gradient(135deg, #00ff9f, #00d982);
+        }
+
+        .quick-stat[data-value="65"] .liquid-wave {
+            bottom: -35%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+        }
+
+        .quick-stat[data-value="60"] .liquid-wave {
+            bottom: -40%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+        }
+
+        .quick-stat[data-value="50"] .liquid-wave {
+            bottom: -50%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+        }
+
+        .quick-stat[data-value="30"] .liquid-wave {
+            bottom: -70%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+        }
+
+        /* Wave effect using pseudo elements */
+        .liquid-wave::before,
+        .liquid-wave::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: transparent;
+            transform: translateX(-50%);
+        }
+
+        .liquid-wave::before {
+            border-radius: 45%;
+            background: rgba(0, 0, 0, 0.1);
+            animation: wave 8s linear infinite;
+        }
+
+        .liquid-wave::after {
+            border-radius: 40%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: wave 12s linear infinite reverse;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateX(-50%) rotate(0deg);
+            }
+            100% {
+                transform: translateX(-50%) rotate(360deg);
+            }
+        }
+
+        .quick-stat-header {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .quick-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Question Steps */
+        .question-steps {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .steps-progress {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .step-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .step-bar.active {
+            background: linear-gradient(90deg, #ff3b5c, #ff0044);
+        }
+
+        .question-content {
+            margin-bottom: 24px;
+        }
+
+        .step-info {
+            font-size: 12px;
+            color: rgba(255, 59, 92, 0.8);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .question {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .question-hint {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Action Buttons - Red Theme */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn.positive {
+            background: rgba(0, 255, 159, 0.1);
+            border-color: rgba(0, 255, 159, 0.3);
+        }
+
+        .action-btn.positive:hover {
+            background: rgba(0, 255, 159, 0.15);
+            border-color: rgba(0, 255, 159, 0.5);
+        }
+
+        .action-btn.negative {
+            background: rgba(255, 59, 92, 0.1);
+            border-color: rgba(255, 59, 92, 0.3);
+        }
+
+        .action-btn.negative:hover {
+            background: rgba(255, 59, 92, 0.15);
+            border-color: rgba(255, 59, 92, 0.5);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .action-btn.positive .btn-icon {
+            background: linear-gradient(135deg, #00ff9f, #00d982);
+        }
+
+        .action-btn.negative .btn-icon {
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+        }
+
+        .btn-content {
+            flex: 1;
+        }
+
+        .btn-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .btn-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Skip Trade Screen */
+        .skip-screen {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .skip-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .skip-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .skip-message {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .confidence-result {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .confidence-result-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .confidence-result-value {
+            font-size: 56px;
+            font-weight: 800;
+            color: #ff6b6b;
+        }
+
+        .restart-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .restart-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Setup Selection Screen */
+        .setup-screen {
+            padding: 20px;
+        }
+
+        .setup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .setup-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .setup-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .setup-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .setup-card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .setup-card:hover {
+            background: rgba(255, 59, 92, 0.05);
+            border-color: rgba(255, 59, 92, 0.3);
+            transform: translateX(4px);
+        }
+
+        .setup-card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .setup-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .setup-card-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.5;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* Stats Screen */
+        .stats-screen {
+            padding: 20px;
+        }
+
+        .stats-header {
+            margin-bottom: 24px;
+        }
+
+        .stats-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .stat-card-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff3b5c, #ff0044);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .stat-card-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .instructions {
+            background: rgba(255, 59, 92, 0.08);
+            border-left: 4px solid #ff3b5c;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .instructions strong {
+            color: #ff3b5c;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 59, 92, 0.4);
+        }
+
+        input[type="text"],
+        input[type="time"] {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 59, 92, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: rgba(255, 59, 92, 0.4);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgba(255, 59, 92, 0.6);
+            background: rgba(255, 59, 92, 0.05);
+            box-shadow: 0 0 0 3px rgba(255, 59, 92, 0.15);
+        }
+
+        .question {
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+
+    <div class="container">
+        <!-- Screen 1: Confidence Step 1 -->
+        <div class="screen active" id="screen-confidence-1">
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <div class="user-info">
+                        <div class="welcome-text">Good morning,</div>
+                        <div class="user-name">VELL</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div class="user-avatar" onclick="showStats()">⚡</div>
+                            <div class="user-avatar" onclick="showPhotoGallery()">📷</div>
+                        </div>
+                        <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5);" id="current-date">Dec 23, 2025</div>
+                        <div style="font-size: 16px; font-weight: 700; color: #ff3b5c;" id="current-time">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="performance-card">
+                    <div class="perf-header">
+                        <div class="perf-label">Total Performance</div>
+                        <div class="perf-trend">
+                            <span>↗</span>
+                            <span id="perf-trend-text">+12%</span>
+                        </div>
+                    </div>
+                    <div class="perf-main">
+                        <div class="perf-value" id="total-r-display">+0R</div>
+                        <div class="perf-subtitle" id="trade-count-display">0 of 100 trades</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trade-cards">
+                <div class="section-header">
+                    <div class="see-all" onclick="showStats()" style="margin-left: auto;">View Stats</div>
+                </div>
+
+                <div class="quick-stats-grid">
+                    <div class="quick-stat" id="win-rate-stat" data-value="0">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Win Rate</div>
+                        <div class="quick-stat-value" id="win-rate-display">0%</div>
+                    </div>
+                    <div class="quick-stat" id="confidence-stat" data-value="100">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Confidence</div>
+                        <div class="quick-stat-value" id="confidence-display-1">100%</div>
+                    </div>
+                </div>
+
+                <div class="question-steps">
+                    <div class="steps-progress">
+                        <div class="step-bar active"></div>
+                        <div class="step-bar"></div>
+                        <div class="step-bar"></div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="step-info">STEP 1 OF 3 • FIRST MOVE CHECK</div>
+                        <div class="question">Is this the first substantial move of this stock today?</div>
+                        <div class="question-hint">Look for clear, obvious momentum</div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <div class="action-btn positive" onclick="answerStep1(true)">
+                            <div class="btn-icon">✓</div>
+                            <div class="btn-content">
+                                <div class="btn-title">Yes - Clear, Obvious 1st Move</div>
+                                <div class="btn-subtitle">Maintains 100% confidence</div>
+                            </div>
+                        </div>
+
+                        <div class="action-btn negative" onclick="answerStep1(false)">
+                            <div class="btn-icon">⚠</div>
+                            <div class="btn-content">
+                                <div class="btn-title">No - Probably Not Gonna Go Well</div>
+                                <div class="btn-subtitle">Reduces to 60% confidence</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Confidence Step 2 -->
+        <div class="screen" id="screen-confidence-2">
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <div class="user-info">
+                        <div class="welcome-text">Good morning,</div>
+                        <div class="user-name">VELL</div>
+                    </div>
+                    <div class="user-avatar" onclick="showStats()">📊</div>
+                </div>
+
+                <div class="performance-card">
+                    <div class="perf-header">
+                        <div class="perf-label">Today's Performance</div>
+                        <div class="perf-trend">
+                            <span>↗</span>
+                            <span>+12%</span>
+                        </div>
+                    </div>
+                    <div class="perf-main">
+                        <div class="perf-value" id="total-r-display-2">+0R</div>
+                        <div class="perf-subtitle" id="trade-count-display-2">0 of 100 trades</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trade-cards">
+                <div class="section-header">
+                    <div class="see-all" onclick="showStats()" style="margin-left: auto;">View Stats</div>
+                </div>
+
+                <div class="quick-stats-grid">
+                    <div class="quick-stat" id="win-rate-stat-2" data-value="0">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Win Rate</div>
+                        <div class="quick-stat-value" id="win-rate-display-2">0%</div>
+                    </div>
+                    <div class="quick-stat" id="confidence-stat-2" data-value="100">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Confidence</div>
+                        <div class="quick-stat-value" id="confidence-display-2">100%</div>
+                    </div>
+                </div>
+
+                <div class="question-steps">
+                    <div class="step-bar-container">
+                        <div class="back-btn" onclick="goToScreen('screen-confidence-1')">← Back</div>
+                    </div>
+
+                    <div class="steps-progress">
+                        <div class="step-bar active"></div>
+                        <div class="step-bar active"></div>
+                        <div class="step-bar"></div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="step-info">STEP 2 OF 3 • TIMING CHECK</div>
+                        <div class="question">Did this move happen right after yesterday's session ended?</div>
+                        <div class="question-hint">Check when the momentum started</div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <div class="action-btn positive" onclick="answerStep2('right-away')">
+                            <div class="btn-icon">⚡</div>
+                            <div class="btn-content">
+                                <div class="btn-title">Happened Right Away</div>
+                                <div class="btn-subtitle">+20% confidence boost</div>
+                            </div>
+                        </div>
+
+                        <div class="action-btn positive" onclick="answerStep2('less-than-10')">
+                            <div class="btn-icon">📊</div>
+                            <div class="btn-content">
+                                <div class="btn-title">Less Than 10 Candles</div>
+                                <div class="btn-subtitle">+10% confidence boost</div>
+                            </div>
+                        </div>
+
+                        <div class="action-btn negative" onclick="answerStep2('more-than-10')">
+                            <div class="btn-icon">⏰</div>
+                            <div class="btn-content">
+                                <div class="btn-title">More Than 10 Candles</div>
+                                <div class="btn-subtitle">-10% confidence</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Confidence Step 3 -->
+        <div class="screen" id="screen-confidence-3">
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <div class="user-info">
+                        <div class="welcome-text">Good morning,</div>
+                        <div class="user-name">VELL</div>
+                    </div>
+                    <div class="user-avatar" onclick="showStats()">📊</div>
+                </div>
+
+                <div class="performance-card">
+                    <div class="perf-header">
+                        <div class="perf-label">Today's Performance</div>
+                        <div class="perf-trend">
+                            <span>↗</span>
+                            <span>+12%</span>
+                        </div>
+                    </div>
+                    <div class="perf-main">
+                        <div class="perf-value" id="total-r-display-3">+0R</div>
+                        <div class="perf-subtitle" id="trade-count-display-3">0 of 100 trades</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trade-cards">
+                <div class="section-header">
+                    <div class="see-all" onclick="showStats()" style="margin-left: auto;">View Stats</div>
+                </div>
+
+                <div class="quick-stats-grid">
+                    <div class="quick-stat" id="win-rate-stat-3" data-value="0">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Win Rate</div>
+                        <div class="quick-stat-value" id="win-rate-display-3">0%</div>
+                    </div>
+                    <div class="quick-stat" id="confidence-stat-3" data-value="100">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Confidence</div>
+                        <div class="quick-stat-value" id="confidence-display-3">100%</div>
+                    </div>
+                </div>
+
+                <div class="question-steps">
+                    <div class="step-bar-container">
+                        <div class="back-btn" onclick="goToScreen('screen-confidence-2')">← Back</div>
+                    </div>
+
+                    <div class="steps-progress">
+                        <div class="step-bar active"></div>
+                        <div class="step-bar active"></div>
+                        <div class="step-bar active"></div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="step-info">STEP 3 OF 3 • SESSION CHECK</div>
+                        <div class="question">Was it in the green session?</div>
+                        <div class="question-hint">Check if market opened green</div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <div class="action-btn positive" onclick="answerStep3(true)">
+                            <div class="btn-icon">🟢</div>
+                            <div class="btn-content">
+                                <div class="btn-title">Yes - Green Session</div>
+                                <div class="btn-subtitle">+10% confidence boost</div>
+                            </div>
+                        </div>
+
+                        <div class="action-btn negative" onclick="answerStep3(false)">
+                            <div class="btn-icon">🔴</div>
+                            <div class="btn-content">
+                                <div class="btn-title">No - Red Session</div>
+                                <div class="btn-subtitle">-30% confidence</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Skip Trade -->
+        <div class="screen" id="screen-skip">
+            <div class="skip-screen">
+                <div class="skip-icon">⚠️</div>
+                <div class="skip-title">Skip This Trade</div>
+                <div class="skip-message">Your confidence is below 70%. It's better to wait for a higher-probability setup.</div>
+                
+                <div class="confidence-result">
+                    <div class="confidence-result-label">Final Confidence</div>
+                    <div class="confidence-result-value" id="final-confidence">0%</div>
+                </div>
+
+                <button class="restart-btn" onclick="resetToStart()">Start New Setup</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Setup Selection -->
+        <div class="screen" id="screen-setup">
+            <div class="setup-screen">
+                <div class="setup-header">
+                    <div class="setup-title">Choose Your Setup</div>
+                    <div class="setup-subtitle" id="setup-confidence-display">Confidence: 100%</div>
+                </div>
+
+                <div class="quick-stats-grid" style="margin-bottom: 24px;">
+                    <div class="quick-stat" id="win-rate-stat-setup" data-value="0">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Win Rate</div>
+                        <div class="quick-stat-value" id="win-rate-display-setup">0%</div>
+                    </div>
+                    <div class="quick-stat" id="confidence-stat-setup" data-value="100">
+                        <div class="liquid-fill">
+                            <div class="liquid-wave"></div>
+                        </div>
+                        <div class="quick-stat-header">Confidence</div>
+                        <div class="quick-stat-value" id="confidence-display-setup">100%</div>
+                    </div>
+                </div>
+
+                <div class="setup-options">
+                    <div class="setup-card" onclick="startSetup('pullback')">
+                        <div class="setup-card-icon">📊</div>
+                        <div class="setup-card-title">Pullback Setup</div>
+                        <svg width="100%" height="80" viewBox="0 0 200 80" style="margin: 10px 0;">
+                            <rect x="10" y="50" width="6" height="20" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="11.5" y="53" width="3" height="14" fill="#00ff9f"/>
+                            <rect x="25" y="40" width="6" height="20" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="26.5" y="43" width="3" height="14" fill="#00ff9f"/>
+                            <rect x="40" y="30" width="6" height="20" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="41.5" y="33" width="3" height="14" fill="#00ff9f"/>
+                            <rect x="55" y="35" width="6" height="20" fill="#ff3b5c" opacity="0.3"/>
+                            <rect x="56.5" y="38" width="3" height="14" fill="#ff3b5c"/>
+                            <rect x="70" y="40" width="6" height="12" fill="#666" opacity="0.3"/>
+                            <rect x="71.5" y="43" width="3" height="6" fill="#666"/>
+                            <rect x="85" y="32" width="6" height="15" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="86.5" y="34" width="3" height="11" fill="#00ff9f"/>
+                            <line x1="52" y1="35" x2="180" y2="35" stroke="#00ff9f" stroke-width="1.5" stroke-dasharray="3,3"/>
+                            <line x1="52" y1="55" x2="180" y2="55" stroke="#ff3b5c" stroke-width="1.5" stroke-dasharray="3,3"/>
+                            <text x="100" y="33" fill="#00ff9f" font-size="8">Entry</text>
+                            <text x="100" y="63" fill="#ff3b5c" font-size="8">Stop</text>
+                        </svg>
+                        <div class="setup-card-desc">Entry: High of Candle #1 | Stop: Low of Candle #1</div>
+                    </div>
+
+                    <div class="setup-card" onclick="startSetup('doji')">
+                        <div class="setup-card-icon">🎯</div>
+                        <div class="setup-card-title">Doji Setup</div>
+                        <svg width="100%" height="80" viewBox="0 0 200 80" style="margin: 10px 0;">
+                            <line x1="5" y1="45" x2="195" y2="45" stroke="#ffa726" stroke-width="1.5"/>
+                            <text x="5" y="42" fill="#ffa726" font-size="7">20 EMA</text>
+                            <rect x="20" y="55" width="6" height="18" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="21.5" y="58" width="3" height="12" fill="#00ff9f"/>
+                            <rect x="35" y="50" width="6" height="18" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="36.5" y="53" width="3" height="12" fill="#00ff9f"/>
+                            <rect x="50" y="42" width="6" height="18" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="51.5" y="45" width="3" height="12" fill="#00ff9f"/>
+                            <line x1="68" y1="38" x2="68" y2="52" stroke="#00ff9f" stroke-width="1.5"/>
+                            <rect x="65" y="43" width="6" height="5" fill="#00ff9f"/>
+                            <rect x="80" y="36" width="6" height="15" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="81.5" y="38" width="3" height="11" fill="#00ff9f"/>
+                            <line x1="62" y1="43" x2="180" y2="43" stroke="#00ff9f" stroke-width="1.5" stroke-dasharray="3,3"/>
+                            <line x1="62" y1="52" x2="180" y2="52" stroke="#ff3b5c" stroke-width="1.5" stroke-dasharray="3,3"/>
+                            <text x="100" y="41" fill="#00ff9f" font-size="8">Entry</text>
+                            <text x="100" y="60" fill="#ff3b5c" font-size="8">Stop</text>
+                        </svg>
+                        <div class="setup-card-desc">Entry: High of doji body | Stop: Low of doji wick</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Pullback Setup Detail -->
+        <div class="screen" id="screen-pullback-detail">
+            <div class="setup-screen">
+                <div class="back-btn" onclick="goToScreen('screen-setup')">← Back</div>
+                
+                <div class="setup-header">
+                    <div class="setup-title">Pullback Setup</div>
+                </div>
+
+                <div class="instructions">
+                    <strong>Visual Example:</strong>
+                    <svg width="100%" height="160" viewBox="0 0 300 160" style="background: rgba(0,0,0,0.5); border-radius: 8px; margin: 10px 0;">
+                        <!-- Move up candles (green) -->
+                        <rect x="20" y="100" width="8" height="35" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="22" y="105" width="4" height="25" fill="#00ff9f"/>
+                        <rect x="40" y="75" width="8" height="35" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="42" y="80" width="4" height="25" fill="#00ff9f"/>
+                        <rect x="60" y="50" width="8" height="35" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="62" y="55" width="4" height="25" fill="#00ff9f"/>
+                        
+                        <!-- Pullback Candle #1 (red) -->
+                        <rect x="80" y="60" width="8" height="35" fill="#ff3b5c" opacity="0.3"/>
+                        <rect x="82" y="65" width="4" height="25" fill="#ff3b5c"/>
+                        <text x="72" y="145" fill="#ff3b5c" font-size="11" font-weight="bold">#1</text>
+                        
+                        <!-- Candle #2 (small) -->
+                        <rect x="100" y="70" width="8" height="20" fill="#666" opacity="0.3"/>
+                        <rect x="102" y="75" width="4" height="10" fill="#666"/>
+                        <text x="92" y="145" fill="#666" font-size="11">#2</text>
+                        
+                        <!-- Candle #3 (green confirmation) -->
+                        <rect x="120" y="55" width="8" height="25" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="122" y="58" width="4" height="20" fill="#00ff9f"/>
+                        <text x="112" y="145" fill="#00ff9f" font-size="11" font-weight="bold">#3</text>
+                        
+                        <!-- Entry Line (high of #1) -->
+                        <line x1="75" y1="60" x2="280" y2="60" stroke="#00ff9f" stroke-width="2" stroke-dasharray="5,5"/>
+                        <text x="185" y="55" fill="#00ff9f" font-size="12" font-weight="bold">Entry Line (High of #1)</text>
+                        
+                        <!-- Stop Line (low of #1) -->
+                        <line x1="75" y1="95" x2="280" y2="95" stroke="#ff3b5c" stroke-width="2" stroke-dasharray="5,5"/>
+                        <text x="185" y="110" fill="#ff3b5c" font-size="12" font-weight="bold">Stop (Low of #1)</text>
+                        
+                        <!-- Labels -->
+                        <text x="30" y="145" fill="#00ff9f" font-size="10">Move Up</text>
+                    </svg>
+                    <strong style="margin-top: 15px; display: block;">Rules:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Entry:</strong> High of Candle #1 (first pullback)</li>
+                        <li><strong>Stop:</strong> Low of Candle #1</li>
+                        <li>Wait for Candle #2 or #3 to <strong>close above</strong> entry</li>
+                    </ul>
+                </div>
+
+                <div class="setup-options">
+                    <div class="setup-card" onclick="enterTrade('pullback')">
+                        <div class="setup-card-icon">✓</div>
+                        <div class="setup-card-title">Pullback Confirmation Confirmed</div>
+                        <div class="setup-card-desc">Enter the trade</div>
+                    </div>
+
+                    <div class="setup-card" onclick="goToScreen('screen-doji-detail')">
+                        <div class="setup-card-icon">🎯</div>
+                        <div class="setup-card-title">Look for Doji Near 20 EMA</div>
+                        <svg width="100%" height="60" viewBox="0 0 150 60" style="margin: 8px 0;">
+                            <line x1="5" y1="30" x2="145" y2="30" stroke="#ffa726" stroke-width="1"/>
+                            <line x1="42" y1="20" x2="42" y2="38" stroke="#00ff9f" stroke-width="1.2"/>
+                            <rect x="39" y="27" width="6" height="4" fill="#00ff9f"/>
+                            <rect x="55" y="18" width="5" height="12" fill="#00ff9f" opacity="0.3"/>
+                            <rect x="56.5" y="20" width="2" height="8" fill="#00ff9f"/>
+                            <line x1="38" y1="27" x2="135" y2="27" stroke="#00ff9f" stroke-width="1" stroke-dasharray="2,2"/>
+                            <line x1="38" y1="38" x2="135" y2="38" stroke="#ff3b5c" stroke-width="1" stroke-dasharray="2,2"/>
+                        </svg>
+                        <div class="setup-card-desc">Switch to doji setup</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Doji Setup Detail -->
+        <div class="screen" id="screen-doji-detail">
+            <div class="setup-screen">
+                <div class="back-btn" onclick="goToScreen('screen-setup')">← Back</div>
+                
+                <div class="setup-header">
+                    <div class="setup-title">Doji Setup</div>
+                </div>
+
+                <div class="instructions">
+                    <strong>Visual Example:</strong>
+                    <svg width="100%" height="160" viewBox="0 0 300 160" style="background: rgba(0,0,0,0.5); border-radius: 8px; margin: 10px 0;">
+                        <!-- 20 EMA Line -->
+                        <line x1="10" y1="82" x2="290" y2="82" stroke="#ffa726" stroke-width="2"/>
+                        <text x="10" y="77" fill="#ffa726" font-size="11" font-weight="bold">20 EMA</text>
+                        
+                        <!-- Move up candles -->
+                        <rect x="40" y="105" width="8" height="30" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="42" y="110" width="4" height="20" fill="#00ff9f"/>
+                        <rect x="60" y="85" width="8" height="30" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="62" y="90" width="4" height="20" fill="#00ff9f"/>
+                        <rect x="80" y="65" width="8" height="30" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="82" y="70" width="4" height="20" fill="#00ff9f"/>
+                        
+                        <!-- Doji candle at 20 EMA -->
+                        <line x1="104" y1="68" x2="104" y2="98" stroke="#00ff9f" stroke-width="2"/>
+                        <rect x="100" y="79" width="8" height="8" fill="#00ff9f"/>
+                        <text x="92" y="145" fill="#00ff9f" font-size="11" font-weight="bold">Doji</text>
+                        
+                        <!-- Confirmation candle -->
+                        <rect x="120" y="62" width="8" height="25" fill="#00ff9f" opacity="0.3"/>
+                        <rect x="122" y="65" width="4" height="20" fill="#00ff9f"/>
+                        <text x="110" y="145" fill="#00ff9f" font-size="11" font-weight="bold">Confirm</text>
+                        
+                        <!-- Entry Line (high of doji body) -->
+                        <line x1="95" y1="79" x2="280" y2="79" stroke="#00ff9f" stroke-width="2" stroke-dasharray="5,5"/>
+                        <text x="165" y="74" fill="#00ff9f" font-size="12" font-weight="bold">Entry (High of Body)</text>
+                        
+                        <!-- Stop Line (low of doji wick) -->
+                        <line x1="95" y1="98" x2="280" y2="98" stroke="#ff3b5c" stroke-width="2" stroke-dasharray="5,5"/>
+                        <text x="165" y="113" fill="#ff3b5c" font-size="12" font-weight="bold">Stop (Low of Wick)</text>
+                        
+                        <!-- Labels -->
+                        <text x="50" y="145" fill="#fff" font-size="10">Move</text>
+                    </svg>
+                    <strong style="margin-top: 15px; display: block;">Rules:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Entry:</strong> High of doji body</li>
+                        <li><strong>Stop:</strong> Low of doji wick</li>
+                        <li>Doji must be <strong>at or near the 20 EMA</strong></li>
+                        <li>Wait for next candle to close above entry</li>
+                    </ul>
+                </div>
+
+                <div class="question" style="text-align: center; margin-top: 20px; font-size: 16px; color: rgba(255,255,255,0.8);">
+                    Is there a cleaner doji closer to the 20 EMA?
+                </div>
+
+                <div class="setup-options">
+                    <div class="setup-card" onclick="goToScreen('screen-doji-detail')">
+                        <div class="setup-card-icon">🔍</div>
+                        <div class="setup-card-title">Look for Better Doji</div>
+                        <svg width="100%" height="60" viewBox="0 0 150 60" style="margin: 8px 0;">
+                            <line x1="5" y1="30" x2="145" y2="30" stroke="#ffa726" stroke-width="1"/>
+                            <line x1="42" y1="20" x2="42" y2="38" stroke="#00ff9f" stroke-width="1.2"/>
+                            <rect x="39" y="27" width="6" height="4" fill="#00ff9f"/>
+                            <circle cx="42" cy="29" r="12" fill="none" stroke="#00ff9f" stroke-width="1" stroke-dasharray="1,1"/>
+                            <line x1="38" y1="27" x2="135" y2="27" stroke="#00ff9f" stroke-width="1" stroke-dasharray="2,2"/>
+                            <line x1="38" y1="38" x2="135" y2="38" stroke="#ff3b5c" stroke-width="1" stroke-dasharray="2,2"/>
+                        </svg>
+                        <div class="setup-card-desc">Find a cleaner setup</div>
+                    </div>
+
+                    <div class="setup-card" onclick="enterTrade('doji')">
+                        <div class="setup-card-icon">✓</div>
+                        <div class="setup-card-title">Found Confirmation</div>
+                        <div class="setup-card-desc">Enter the trade</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Trade Active -->
+        <div class="screen" id="screen-in-trade">
+            <div class="setup-screen">
+                <div class="setup-header">
+                    <div class="setup-title">Trade Active</div>
+                    <div class="setup-subtitle">What happened?</div>
+                </div>
+
+                <div class="setup-options">
+                    <div class="setup-card positive" onclick="goToOutcome(2)" style="background: rgba(0, 255, 159, 0.1); border-color: rgba(0, 255, 159, 0.3);">
+                        <div class="setup-card-icon">✅</div>
+                        <div class="setup-card-title">Hit +2R Target</div>
+                        <div class="setup-card-desc">Winner!</div>
+                    </div>
+
+                    <div class="setup-card" onclick="goToScreen('screen-1r-protection')">
+                        <div class="setup-card-icon">⚡</div>
+                        <div class="setup-card-title">Hit 1R First</div>
+                        <div class="setup-card-desc">Move to protection</div>
+                    </div>
+
+                    <div class="setup-card" onclick="goToOutcome(-1)" style="background: rgba(255, 59, 92, 0.1); border-color: rgba(255, 59, 92, 0.3);">
+                        <div class="setup-card-icon">❌</div>
+                        <div class="setup-card-title">Hit -1R Stop</div>
+                        <div class="setup-card-desc">Stop loss hit</div>
+                    </div>
+                </div>
+
+                <div class="instructions" style="margin-top: 20px; border-left-color: #ffa726;">
+                    <strong>Note:</strong> If price returns to entry but hasn't hit 1R yet, stay in the trade. Only exit at +2R, 1R protection, or -1R.
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: 1R Protection -->
+        <div class="screen" id="screen-1r-protection">
+            <div class="setup-screen">
+                <div class="setup-header">
+                    <div class="setup-title">1R Protection Active</div>
+                </div>
+
+                <div class="instructions" style="border-left-color: #00ff9f;">
+                    <strong>Break-Even Locked In!</strong>
+                    <p style="margin-top: 8px;">You've hit 1R. Minimum outcome is now break-even.</p>
+                </div>
+
+                <div class="question" style="text-align: center; margin-top: 20px; font-size: 16px; color: rgba(255,255,255,0.8);">
+                    What happened next?
+                </div>
+
+                <div class="setup-options">
+                    <div class="setup-card positive" onclick="goToOutcome(2)" style="background: rgba(0, 255, 159, 0.1); border-color: rgba(0, 255, 159, 0.3);">
+                        <div class="setup-card-icon">✅</div>
+                        <div class="setup-card-title">Hit +2R Target</div>
+                        <div class="setup-card-desc">Winner!</div>
+                    </div>
+
+                    <div class="setup-card" onclick="goToOutcome(0)">
+                        <div class="setup-card-icon">↔️</div>
+                        <div class="setup-card-title">Came Back to Entry</div>
+                        <div class="setup-card-desc">Scratch trade</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Log Trade -->
+        <div class="screen" id="screen-log-trade">
+            <div class="setup-screen">
+                <div class="setup-header">
+                    <div class="setup-title">Log Trade Details</div>
+                </div>
+
+                <div class="instructions">
+                    <strong>Setup:</strong> <span id="log-setup-type"></span><br>
+                    <strong>Outcome:</strong> <span id="log-outcome"></span><br>
+                    <strong>Confidence:</strong> <span id="log-confidence"></span>
+                </div>
+
+                <input type="text" id="ticker-input" placeholder="Ticker Symbol (e.g., AAPL)" required style="width: 100%; padding: 14px; margin: 10px 0; border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.03); color: white; font-size: 15px;">
+
+                <input type="time" id="time-input" required style="width: 100%; padding: 14px; margin: 10px 0; border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.03); color: white; font-size: 15px;">
+
+                <div class="photo-upload" style="margin: 20px 0;">
+                    <label for="photo-input" style="display: block; padding: 20px; background: rgba(255, 59, 92, 0.05); border: 2px dashed rgba(255, 59, 92, 0.4); border-radius: 14px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-size: 14px;">
+                        📷 Add Chart Photos<br>
+                        <small style="font-size: 12px; color: rgba(255,255,255,0.5);">(Tap to select up to 3 photos)</small>
+                    </label>
+                    <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+                    <div class="photo-preview" id="photo-preview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+                </div>
+
+                <button class="restart-btn" onclick="saveTrade()">Save Trade</button>
+                <button class="back-btn" onclick="goToScreen('screen-in-trade')" style="margin-top: 10px; background: rgba(255, 255, 255, 0.05);">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Screen 6: Stats -->
+        <div class="screen" id="screen-stats">
+            <div class="stats-screen">
+                <div class="back-btn" onclick="goToScreen('screen-confidence-1')">← Back to Trading</div>
+                
+                <div class="stats-header">
+                    <div class="stats-title">Performance Stats</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-total-r">+0R</div>
+                        <div class="stat-card-label">Total R</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-trades">0/100</div>
+                        <div class="stat-card-label">Trades</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-winners">0</div>
+                        <div class="stat-card-label">Winners</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-losers">0</div>
+                        <div class="stat-card-label">Losers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-scratches">0</div>
+                        <div class="stat-card-label">Scratches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-winrate">0%</div>
+                        <div class="stat-card-label">Win Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 7: Photo Gallery -->
+        <div class="screen" id="screen-gallery">
+            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000;">
+                <!-- Header -->
+                <div style="padding: 20px; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid rgba(255, 59, 92, 0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="back-btn" onclick="closePhotoGallery()" style="margin: 0;">← Back</div>
+                        <div style="font-size: 14px; color: rgba(255, 255, 255, 0.7);">
+                            <span id="gallery-counter">0 / 0</span> Photos
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo Display -->
+                <div style="position: relative; height: calc(100vh - 280px); display: flex; align-items: center; justify-content: center; padding: 20px;">
+                    <img id="gallery-photo" src="" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px;" alt="Trade Chart">
+                    
+                    <!-- Navigation Arrows -->
+                    <div onclick="previousPhoto()" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(255, 59, 92, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px;">
+                        ←
+                    </div>
+                    <div onclick="nextPhoto()" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(255, 59, 92, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px;">
+                        →
+                    </div>
+                </div>
+
+                <!-- Trade Info -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 100%); padding: 24px;">
+                    <div style="max-width: 430px; margin: 0 auto;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                            <div style="background: rgba(255, 59, 92, 0.1); border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; padding: 12px;">
+                                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;">SETUP</div>
+                                <div style="font-size: 16px; font-weight: 700; color: #ff3b5c;" id="gallery-setup">-</div>
+                            </div>
+                            <div style="background: rgba(255, 59, 92, 0.1); border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; padding: 12px;">
+                                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;">TIME</div>
+                                <div style="font-size: 16px; font-weight: 700; color: #ff3b5c;" id="gallery-time">-</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div style="background: rgba(255, 59, 92, 0.1); border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; padding: 12px;">
+                                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;">CONFIDENCE</div>
+                                <div style="font-size: 16px; font-weight: 700; color: #ff3b5c;" id="gallery-confidence">-</div>
+                            </div>
+                            <div style="background: rgba(255, 59, 92, 0.1); border: 1px solid rgba(255, 59, 92, 0.3); border-radius: 12px; padding: 12px;">
+                                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;">TICKER</div>
+                                <div style="font-size: 16px; font-weight: 700; color: #ff3b5c;" id="gallery-ticker">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentConfidence = 100;
+        let currentSetup = '';
+        let currentOutcome = 0;
+        let selectedPhotos = [];
+        let trades = [];
+        let db;
+
+        // IndexedDB Setup
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('DojoTrackerDB', 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains('trades')) {
+                        const objectStore = db.createObjectStore('trades', { keyPath: 'id' });
+                        objectStore.createIndex('date', 'date', { unique: false });
+                        objectStore.createIndex('ticker', 'ticker', { unique: false });
+                    }
+                };
+            });
+        }
+
+        // IndexedDB Helper Functions
+        function addTrade(trade) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['trades'], 'readwrite');
+                const objectStore = transaction.objectStore('trades');
+                const request = objectStore.add(trade);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getAllTrades() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['trades'], 'readonly');
+                const objectStore = transaction.objectStore('trades');
+                const request = objectStore.getAll();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await initDB();
+                trades = await getAllTrades();
+                // Sort by date (newest first)
+                trades.sort((a, b) => b.id - a.id);
+                updateAllStats();
+            } catch (error) {
+                console.error('Error initializing database:', error);
+                alert('Error loading app. Please refresh the page.');
+            }
+            
+            // Set current time in time input
+            const now = new Date();
+            const timeString = now.toTimeString().slice(0, 5);
+            const timeInput = document.getElementById('time-input');
+            if (timeInput) {
+                timeInput.value = timeString;
+            }
+
+            // Photo input handler
+            const photoInput = document.getElementById('photo-input');
+            if (photoInput) {
+                photoInput.addEventListener('change', handlePhotoSelect);
+            }
+
+            // Start live clock
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+
+        function updateClock() {
+            const now = new Date();
+            
+            // Update time (12-hour format with AM/PM)
+            let hours = now.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+            
+            const timeEl = document.getElementById('current-time');
+            if (timeEl) {
+                timeEl.textContent = timeString;
+            }
+            
+            // Update date (MMM DD, YYYY)
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            const dateString = now.toLocaleDateString('en-US', options);
+            
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) {
+                dateEl.textContent = dateString;
+            }
+        }
+
+        function goToScreen(screenId) {
+            const currentScreen = document.querySelector('.screen.active');
+            const nextScreen = document.getElementById(screenId);
+            
+            if (currentScreen) {
+                currentScreen.classList.add('exiting');
+                setTimeout(() => {
+                    currentScreen.classList.remove('active', 'exiting');
+                    nextScreen.classList.add('active');
+                }, 300);
+            } else {
+                nextScreen.classList.add('active');
+            }
+        }
+
+        function updateConfidenceDisplay(value) {
+            const newConfidence = Math.max(0, Math.min(100, value));
+            
+            // Delay the animation until after page transition
+            setTimeout(() => {
+                currentConfidence = newConfidence;
+                
+                // Update all confidence displays
+                const displays = [
+                    'confidence-display-1',
+                    'confidence-display-2', 
+                    'confidence-display-3',
+                    'confidence-display-setup'
+                ];
+                
+                displays.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = currentConfidence + '%';
+                });
+
+                // Update confidence stat cards with animation
+                const statCards = [
+                    'confidence-stat',
+                    'confidence-stat-2',
+                    'confidence-stat-3',
+                    'confidence-stat-setup'
+                ];
+
+                statCards.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.setAttribute('data-value', currentConfidence);
+                    }
+                });
+
+                // Update setup display
+                const setupDisplay = document.getElementById('setup-confidence-display');
+                if (setupDisplay) {
+                    setupDisplay.textContent = 'Confidence: ' + currentConfidence + '%';
+                }
+            }, 400); // Wait for page transition to complete (400ms)
+        }
+
+        function answerStep1(isFirst) {
+            if (isFirst) {
+                updateConfidenceDisplay(100);
+            } else {
+                updateConfidenceDisplay(60);
+            }
+            goToScreen('screen-confidence-2');
+        }
+
+        function answerStep2(timing) {
+            if (timing === 'right-away') {
+                updateConfidenceDisplay(Math.min(100, currentConfidence + 20));
+            } else if (timing === 'less-than-10') {
+                updateConfidenceDisplay(Math.min(100, currentConfidence + 10));
+            } else if (timing === 'more-than-10') {
+                updateConfidenceDisplay(currentConfidence - 10);
+            }
+            goToScreen('screen-confidence-3');
+        }
+
+        function answerStep3(isGreen) {
+            // Calculate new confidence FIRST
+            let newConfidence;
+            if (isGreen) {
+                newConfidence = Math.min(100, currentConfidence + 10);
+            } else {
+                newConfidence = currentConfidence - 30;
+            }
+            
+            // Update the display with animation
+            updateConfidenceDisplay(newConfidence);
+
+            // Check threshold with NEW confidence value
+            if (newConfidence < 70) {
+                document.getElementById('final-confidence').textContent = newConfidence + '%';
+                goToScreen('screen-skip');
+            } else {
+                goToScreen('screen-setup');
+            }
+        }
+
+        function resetToStart() {
+            currentConfidence = 100;
+            currentSetup = '';
+            currentOutcome = 0;
+            selectedPhotos = [];
+            updateConfidenceDisplay(100);
+            goToScreen('screen-confidence-1');
+        }
+
+        function startSetup(setup) {
+            // Check if confidence is still above 70%
+            if (currentConfidence < 70) {
+                alert('⚠️ Confidence is below 70%. You cannot enter this trade.');
+                goToScreen('screen-skip');
+                return;
+            }
+            
+            currentSetup = setup;
+            if (setup === 'pullback') {
+                goToScreen('screen-pullback-detail');
+            } else {
+                goToScreen('screen-doji-detail');
+            }
+        }
+
+        function enterTrade(setup) {
+            currentSetup = setup;
+            goToScreen('screen-in-trade');
+        }
+
+        function goToOutcome(outcome) {
+            currentOutcome = outcome;
+            
+            // Set up log screen
+            document.getElementById('log-setup-type').textContent = currentSetup.toUpperCase();
+            
+            let outcomeText = '';
+            if (outcome === 2) outcomeText = '+2R (Winner)';
+            else if (outcome === 0) outcomeText = '0R (Scratch)';
+            else if (outcome === -1) outcomeText = '-1R (Loss)';
+            
+            document.getElementById('log-outcome').textContent = outcomeText;
+            document.getElementById('log-confidence').textContent = currentConfidence + '%';
+            
+            // Reset form
+            selectedPhotos = [];
+            document.getElementById('photo-preview').innerHTML = '';
+            document.getElementById('ticker-input').value = '';
+            
+            const now = new Date();
+            const timeString = now.toTimeString().slice(0, 5);
+            document.getElementById('time-input').value = timeString;
+            
+            goToScreen('screen-log-trade');
+        }
+
+        function handlePhotoSelect(e) {
+            const files = Array.from(e.target.files);
+            selectedPhotos = [];
+            
+            const preview = document.getElementById('photo-preview');
+            preview.innerHTML = '';
+            
+            if (files.length === 0) return;
+            
+            // Limit to 3 photos
+            const filesToProcess = files.slice(0, 3);
+            
+            filesToProcess.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Resize to max 800px width
+                            let width = img.width;
+                            let height = img.height;
+                            const maxWidth = 800;
+                            
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Compress to JPEG
+                            const compressedData = canvas.toDataURL('image/jpeg', 0.6);
+                            selectedPhotos.push(compressedData);
+                            
+                            // Show preview
+                            const previewImg = document.createElement('img');
+                            previewImg.src = compressedData;
+                            preview.appendChild(previewImg);
+                        } catch (err) {
+                            console.error('Error compressing image:', err);
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            if (files.length > 3) {
+                setTimeout(() => {
+                    alert('Limited to 3 photos per trade to save storage space');
+                }, 100);
+            }
+        }
+
+        async function saveTrade() {
+            const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
+            const time = document.getElementById('time-input').value;
+            
+            if (!ticker) {
+                alert('Please enter a ticker symbol');
+                return;
+            }
+            
+            if (!time) {
+                alert('Please enter the time');
+                return;
+            }
+            
+            const trade = {
+                id: Date.now(),
+                setup: currentSetup,
+                outcome: currentOutcome,
+                confidence: currentConfidence,
+                ticker: ticker,
+                time: time,
+                date: new Date().toLocaleDateString(),
+                photos: selectedPhotos.slice()
+            };
+            
+            try {
+                await addTrade(trade);
+                trades = await getAllTrades();
+                trades.sort((a, b) => b.id - a.id);
+                
+                alert('✅ Trade saved successfully!\n\nTicker: ' + ticker + '\nTotal trades: ' + trades.length);
+                
+                // Clear and reset
+                selectedPhotos = [];
+                document.getElementById('photo-preview').innerHTML = '';
+                document.getElementById('ticker-input').value = '';
+                document.getElementById('photo-input').value = '';
+                
+                updateAllStats();
+                resetToStart();
+                
+            } catch (e) {
+                console.error('Error saving trade:', e);
+                alert('❌ Error saving trade: ' + e.message);
+            }
+        }
+
+        function showStats() {
+            updateAllStats();
+            goToScreen('screen-stats');
+        }
+
+        let allPhotos = [];
+        let currentPhotoIndex = 0;
+
+        function showPhotoGallery() {
+            console.log('showPhotoGallery called');
+            console.log('Total trades:', trades.length);
+            
+            // Collect all photos from all trades
+            allPhotos = [];
+            trades.forEach(trade => {
+                console.log('Trade:', trade.ticker, 'Photos:', trade.photos ? trade.photos.length : 0);
+                if (trade.photos && trade.photos.length > 0) {
+                    trade.photos.forEach(photo => {
+                        allPhotos.push({
+                            photo: photo,
+                            setup: trade.setup,
+                            time: trade.time,
+                            confidence: trade.confidence,
+                            ticker: trade.ticker,
+                            date: trade.date
+                        });
+                    });
+                }
+            });
+
+            console.log('Total photos found:', allPhotos.length);
+
+            if (allPhotos.length === 0) {
+                alert('No photos yet! Take some trades first.');
+                return;
+            }
+
+            currentPhotoIndex = 0;
+            displayPhoto(0);
+            goToScreen('screen-gallery');
+        }
+
+        function displayPhoto(index) {
+            if (allPhotos.length === 0) return;
+
+            const photoData = allPhotos[index];
+            
+            document.getElementById('gallery-photo').src = photoData.photo;
+            document.getElementById('gallery-setup').textContent = photoData.setup.toUpperCase();
+            document.getElementById('gallery-time').textContent = photoData.time;
+            document.getElementById('gallery-confidence').textContent = photoData.confidence + '%';
+            document.getElementById('gallery-ticker').textContent = photoData.ticker;
+            document.getElementById('gallery-counter').textContent = (index + 1) + ' / ' + allPhotos.length;
+        }
+
+        function nextPhoto() {
+            if (allPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex + 1) % allPhotos.length;
+            displayPhoto(currentPhotoIndex);
+        }
+
+        function previousPhoto() {
+            if (allPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex - 1 + allPhotos.length) % allPhotos.length;
+            displayPhoto(currentPhotoIndex);
+        }
+
+        function closePhotoGallery() {
+            goToScreen('screen-confidence-1');
+        }
+
+        function updateAllStats() {
+            const totalR = trades.reduce((sum, t) => sum + t.outcome, 0);
+            const totalTrades = trades.length;
+            const winners = trades.filter(t => t.outcome === 2).length;
+            const losers = trades.filter(t => t.outcome === -1).length;
+            const scratches = trades.filter(t => t.outcome === 0).length;
+            const winRate = totalTrades > 0 ? Math.round((winners / totalTrades) * 100) : 0;
+
+            // Update performance card
+            const displays = [
+                'total-r-display',
+                'total-r-display-2',
+                'total-r-display-3',
+                'stat-total-r'
+            ];
+            displays.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = (totalR >= 0 ? '+' : '') + totalR + 'R';
+            });
+
+            const tradeDisplays = [
+                'trade-count-display',
+                'trade-count-display-2',
+                'trade-count-display-3',
+                'stat-trades'
+            ];
+            tradeDisplays.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id.startsWith('stat-')) {
+                        el.textContent = totalTrades + '/100';
+                    } else {
+                        el.textContent = totalTrades + ' of 100 trades';
+                    }
+                }
+            });
+
+            // Update win rate displays
+            const winRateDisplays = [
+                'win-rate-display',
+                'win-rate-display-2',
+                'win-rate-display-3',
+                'win-rate-display-setup'
+            ];
+            winRateDisplays.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = winRate + '%';
+            });
+
+            // Update win rate stat cards
+            const winRateStats = [
+                'win-rate-stat',
+                'win-rate-stat-2',
+                'win-rate-stat-3',
+                'win-rate-stat-setup'
+            ];
+            winRateStats.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('data-value', winRate);
+            });
+
+            // Update stats screen
+            document.getElementById('stat-winners').textContent = winners;
+            document.getElementById('stat-losers').textContent = losers;
+            document.getElementById('stat-scratches').textContent = scratches;
+            document.getElementById('stat-winrate').textContent = winRate + '%';
+
+            // Update trend
+            const trendEl = document.getElementById('perf-trend-text');
+            if (trendEl && totalR > 0) {
+                trendEl.textContent = '+' + Math.round((totalR / (totalTrades || 1)) * 10) + '%';
+            }
+        }
+    </script>
+</body>
+</html>
